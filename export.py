@@ -17,7 +17,8 @@ def main(argv):
 
 
   with open(inputfile) as f:
-    all_content = f.readlines()
+    all_content = f.read()
+  lines = all_content.splitlines()
 
   content = ''
   is_content = True
@@ -25,8 +26,7 @@ def main(argv):
   creation_date = ""
   last_modified = ""
   
-  for raw_line in all_content:
-    line = raw_line.rstrip('\n') 
+  for line in lines:
     if line.startswith('id: '):
       is_content = False
       id = line.replace('id: ','')
@@ -46,5 +46,6 @@ def main(argv):
   }
 
   print(note)
+
 if __name__ == "__main__":
    main(['-isource/0b38f33abf634bf9b17ab47a550bcc35.md'])    
