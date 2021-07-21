@@ -17,14 +17,34 @@ def main(argv):
 
 
   with open(inputfile) as f:
-    content = f.readlines()
+    all_content = f.readlines()
 
-  for line in content:
-    print(line)
+  content = ''
+  is_content = True
+  id = ""
+  creation_date = ""
+  last_modified = ""
+  
+  for raw_line in all_content:
+    line = raw_line.rstrip('\n') 
+    if line.startswith('id: '):
+      is_content = False
+      id = line.replace('id: ','')
+    elif line.startswith('created_time'):
+      creation_date = line.replace('created_time','')
+    elif line.startswith('updated_time'):
+      last_modified = line.replace('updated_time','')
+    else:
+      if is_content:
+        content += line
+  note = {
+    "id" : id,
+    "content" : content,
+    "creationDate" : creation_date,
+    "lastModified" : last_modified,
+    "markdown" : True
+  }
 
-  print('XXX')
-  print('XXX')
-
-
+  print(note)
 if __name__ == "__main__":
    main(['-isource/0b38f33abf634bf9b17ab47a550bcc35.md'])    
