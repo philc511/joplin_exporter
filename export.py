@@ -1,24 +1,43 @@
-import sys, getopt
+import sys, getopt, json, os
 
 def main(argv):
-  inputfile = ''
+  inputfolder = ''
   try:
-    opts, args = getopt.getopt(argv,"hi:",["ifile="])
+    opts, args = getopt.getopt(argv,"hi:",["idir="])
   except getopt.GetoptError:
-    print('test.py -i <inputfile> -o <outputfile>')
+    print('test.py -i <inputdir>')
     sys.exit(2)
   for opt, arg in opts:
     if opt == '-h':
-      print('test.py -i <inputfile> -o <outputfile>')
+      print('test.py -i <inputdir>')
       sys.exit()
-    elif opt in ("-i", "--ifile"):
-      inputfile = arg
-  print('Input file is "', inputfile)
+    elif opt in ("-i", "--idir"):
+      inputfolder = arg
 
+  files = os.listdir(inputfolder)
 
-  with open(inputfile) as f:
-    all_content = f.read()
-  lines = all_content.splitlines()
+  notes = get_notes(files, inputfolder)
+
+  all = {
+    "activeNotes": notes,
+    "trashedNotes": []
+  }
+
+  print(json.dumps(all, indent=2))
+
+def get_notes(files, inputfolder):
+  notes = []
+
+  for file in files:
+    with open(os.path.join(inputfolder, file)) as f:
+      all_content = f.read()
+  
+    notes.append(create_note(all_content))
+
+  return notes
+
+def create_note(md_doc):
+  lines = md_doc.splitlines()
 
   content = ''
   is_content = True
@@ -30,14 +49,15 @@ def main(argv):
     if line.startswith('id: '):
       is_content = False
       id = line.replace('id: ','')
-    elif line.startswith('created_time'):
-      creation_date = line.replace('created_time','')
-    elif line.startswith('updated_time'):
-      last_modified = line.replace('updated_time','')
+    elif line.startswith('created_time: '):
+      creation_date = line.replace('created_time: ','')
+    elif line.startswith('updated_time: '):
+      last_modified = line.replace('updated_time: ','')
     else:
       if is_content:
         content += line
-  note = {
+        content += "\r\n"
+  return {
     "id" : id,
     "content" : content,
     "creationDate" : creation_date,
@@ -45,7 +65,5 @@ def main(argv):
     "markdown" : True
   }
 
-  print(note)
-
 if __name__ == "__main__":
-   main(['-isource/0b38f33abf634bf9b17ab47a550bcc35.md'])    
+   main(['-isource'])    
